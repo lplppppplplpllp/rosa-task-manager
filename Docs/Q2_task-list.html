@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!-- HTML5ドキュメントであることを宣言 -->
+
+<html lang="ja">
+<!-- 言語設定：日本語 -->
+
+<head>
+  <!-- 文字コード：日本語を含む文字も表示可能なUTF-8 -->
+  <meta charset="UTF-8" />
+
+  <!-- スマホ対応の表示スケール設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- タイトル：ブラウザタブに表示される文字 -->
+  <title>依頼を確認 - rosa-task-manager</title>
+
+  <style>
+    /* すべての要素に box-sizing を指定（幅や高さに padding・border を含める） */
+    * {
+      box-sizing: border-box;
+    }
+
+    /* HTMLとBODYの共通設定（ダークモードベース） */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif; /* 見やすくてモダンなフォント */
+      background-color: #1e2a38;           /* ダークモード背景 */
+      color: white;                        /* 白文字 */
+      transition: background-color 0.3s, color 0.3s; /* モード切替時のアニメ */
+      overflow: hidden;                   /* スクロールバーの余白防止 */
+    }
+
+    /* ライトモード設定：背景と文字色変更 */
+    body.light {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    /* ===== ヘッダーとフッター共通スタイル ===== */
+    header, footer {
+      position: fixed; /* 常に画面に固定 */
+      left: 0;
+      width: 100%;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* 両端に配置 */
+      padding: 0 1rem;
+      background-color: #000; /* ダーク背景 */
+      color: white;
+      z-index: 999; /* 他の要素より前面に表示 */
+    }
+
+    header { top: 0; }    /* ヘッダーは上部 */
+    footer { bottom: 0; } /* フッターは下部 */
+
+    /* ライトモード時のヘッダーとフッター */
+    body.light header,
+    body.light footer {
+      background-color: #ffffff;
+      color: #333;
+    }
+
+    .header-title {
+      font-size: 0.9rem; /* タイトルのフォントサイズ */
+    }
+
+    /* ===== ボタン共通スタイル（モード切替・戻る・実績） ===== */
+    #mode-toggle,
+    #back-btn,
+    #achievement-btn {
+      background-color: transparent; /* 背景なし */
+      border: none;                  /* 枠線なし */
+      color: white;
+      padding: 0.3rem 0.8rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    #mode-toggle, #back-btn {
+      background-color: transparent; /* 背景透明 */
+      border: none; /* 枠線なし */
+      color: white; /* 白文字 */
+      padding: 0.3rem 0.8rem; /* 余白 */
+      border-radius: 0; /* 角なしでスタイリッシュに */
+      cursor: pointer; /* カーソルをポインタに */
+      font-size: 1.2rem;
+      font-weight: bold;
+      transition: background-color 0.2s ease, color 0.2s ease; /* ホバーのアニメ */
+    }
+
+    /* ライトモード時の文字色 */
+    body.light #mode-toggle,
+    body.light #back-btn,
+    body.light #achievement-btn {
+      color: #333;
+    }
+
+    /* ボタンホバー時の背景色（ダークモード） */
+    #mode-toggle:hover,
+    #back-btn:hover,
+    #achievement-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ホバー時（ライトモード） */
+    body.light #mode-toggle:hover,
+    body.light #back-btn:hover,
+    body.light #achievement-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== ヘッダー・フッターを除いたスクロール可能なコンテンツラッパー ===== */
+    .content-wrapper {
+      position: absolute;
+      top: 70px;    /* ヘッダー分だけ下にずらす */
+      bottom: 70px; /* フッター分だけ上にずらす */
+      left: 0;
+      right: 0;
+      overflow-y: auto; /* コンテンツ部分は縦にスクロール可 */
+    }
+
+    /* メインコンテンツ領域のスタイル */
+    main {
+      max-width: 800px;      /* 最大幅を800pxに制限（中央寄せ） */
+      margin: 0 auto;
+      padding: 2rem 1rem;    /* 上下左右に余白 */
+    }
+
+    /* 実績ボタンを右上に配置 */
+    .top-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    /* 見出し */
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-weight: 500;
+    }
+
+    /* ===== キャラクター選択ボタン（3人） ===== */
+    .char-select {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap; /* 小さい画面でも折り返しOK */
+    }
+
+    /* キャラクターボックス（画像＋名前） */
+    .char-box {
+      border: 2px solid transparent;
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 200px;
+      background-color: #ffffff08; /* 半透明白背景 */
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* 選択状態のキャラクターボックス（枠線強調） */
+    .char-box.selected {
+      border-color: #dc6b9a; /* ピンク系 */
+    }
+
+    .char-box img {
+      width: 100%; /* 画像幅を100%に調整 */
+      display: block;
+    }
+
+    /* キャラ名ラベル */
+    .char-name {
+      background-color: #f0f0f0;
+      color: #2c3e50;
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      padding: 0.6rem 0;
+    }
+
+    /* ===== タスクリスト表示枠 ===== */
+    .task-list {
+      background-color: #2c3e50;
+      padding: 1.2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      border-left: 5px solid #dc6b9a; /* 左にピンクライン */
+    }
+
+    /* ライトモード用：背景を白に */
+    body.light .task-list {
+      background-color: #ffffff;
+    }
+
+    /* タスク1件分の表示枠 */
+    .task-item {
+      background-color: #ffffff11;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #888; /* タスクの区切りライン */
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    body.light .task-item {
+      background-color: #eeeeee;
+    }
+
+    /* 完了済みのタスクは非表示 */
+    .task-item.completed {
+      display: none;
+    }
+
+    /* ===== タスク内の「完了にする」ボタン ===== */
+    .task-item button {
+      margin-top: 0.8rem;
+      background-color: #dc6b9a;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .task-item button:hover {
+      background-color: #b75c80;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== ヘッダー：タイトルとモード切替ボタン ===== -->
+  <header>
+    <!-- ページタイトル -->
+    <span class="header-title">法律事務所 | 依頼一覧</span>
+
+    <!-- 🌙/🌞 モード切替ボタン（クリックで切り替え） -->
+    <button id="mode-toggle">🌙 night</button>
+  </header>
+
+  <!-- ===== ヘッダー・フッター間のスクロール領域全体をラップ ===== -->
+  <div class="content-wrapper">
+    <main>
+      <!-- 実績ページへ遷移するボタン（右上） -->
+      <div class="top-buttons">
+        <button id="achievement-btn" onclick="location.href='Q2_achievements.html'">実績を見る</button>
+      </div>
+
+      <!-- キャラクター選択の案内文 -->
+      <h2>誰からの依頼をこなしますか？</h2>
+
+      <!-- キャラ選択エリア（3人） -->
+      <div class="char-select">
+        <!-- Celestineボックス -->
+        <div class="char-box" data-char="Celestine">
+          <img src="../Q2imgs/Celestine.png" alt="Celestine">
+          <div class="char-name">Celestine</div>
+        </div>
+
+        <!-- Artemボックス -->
+        <div class="char-box" data-char="Artem">
+          <img src="../Q2imgs/artem.png" alt="Artem">
+          <div class="char-name">Artem</div>
+        </div>
+
+        <!-- Kikiボックス -->
+        <div class="char-box" data-char="Kiki">
+          <img src="../Q2imgs/kiki.png" alt="Kiki">
+          <div class="char-name">Kiki</div>
+        </div>
+      </div>
+
+      <!-- タスク一覧の表示場所（キャラ選択後に表示） -->
+      <div class="task-list" id="task-list"></div>
+    </main>
+  </div>
+
+  <!-- ===== フッター：戻るボタン ===== -->
+  <footer>
+    <!-- トップページに戻る -->
+    <button id="back-btn" onclick="location.href='Q2_index.html'">受付に戻る</button>
+  </footer>
+
+  <!-- ===== JavaScriptエリア ===== -->
+  <script>
+    // HTMLから必要な要素を取得
+    const boxes = document.querySelectorAll('.char-box'); // キャラボックス
+    const taskList = document.getElementById('task-list'); // タスク表示枠
+    const modeToggle = document.getElementById('mode-toggle'); // モード切替ボタン
+    const body = document.body;
+
+    // localStorageからrosaTasksを取得（なければ空配列）
+    let tasks = JSON.parse(localStorage.getItem('rosaTasks')) || [];
+
+    // 選択中のキャラを記録する変数
+    let selectedChar = null;
+
+    // ===== キャラをクリックしたときの挙動 =====
+    boxes.forEach(box => {
+      box.addEventListener('click', () => {
+        const char = box.dataset.char; // data-charの値を取得
+
+        if (selectedChar === char) {
+          // 同じキャラをもう一度クリックしたら選択解除
+          selectedChar = null;
+          boxes.forEach(b => b.classList.remove('selected')); // 全部選択解除
+          taskList.innerHTML = ''; // タスク欄もクリア
+          return;
+        }
+
+        // 新しいキャラを選択状態にする
+        selectedChar = char;
+        boxes.forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+
+        // 選ばれたキャラのタスクだけ抽出（完了してないもの）
+        const filtered = tasks.filter(t => t.assignedBy === char && !t.completed);
+        displayTasks(filtered); // タスク表示関数を呼び出し
+      });
+    });
+
+    // ===== タスクリストを表示する関数 =====
+    function displayTasks(taskArray) {
+      taskList.innerHTML = ''; // 一旦タスク表示をリセット
+
+      // タスクが0件だった場合のメッセージ
+      if (taskArray.length === 0) {
+        taskList.innerHTML = '<p>このキャラからの依頼はありません。</p>';
+        return;
+      }
+
+      // タスクごとにHTML要素を生成して表示
+      taskArray.forEach(task => {
+        const div = document.createElement('div'); // div要素を作成
+        div.className = 'task-item'; // スタイル用クラス付与
+
+        // タスクの内容（名前・締切・完了ボタン）を挿入
+        div.innerHTML = `
+          <strong>${task.name}</strong><br>
+          締切：${task.deadline || 'なし'}<br>
+          <button onclick="toggleComplete('${task.id}')">完了にする</button>
+        `;
+        taskList.appendChild(div); // タスクリストに追加
+      });
+    }
+
+    // ===== タスクを完了済みに変更する関数 =====
+    function toggleComplete(id) {
+      const index = tasks.findIndex(t => t.id === id); // IDから対象タスクを探す
+      if (index !== -1) {
+        tasks[index].completed = true; // completedをtrueにする
+        localStorage.setItem('rosaTasks', JSON.stringify(tasks)); // 保存を更新
+
+        // 現在選択中のキャラがいれば、そのキャラのタスクを再表示
+        if (selectedChar) {
+          const filtered = tasks.filter(t => t.assignedBy === selectedChar && !t.completed);
+          displayTasks(filtered);
+        }
+      }
+    }
+
+    // ===== 🌞/🌙 モード切替ボタンの挙動 =====
+    modeToggle.addEventListener('click', () => {
+      const isLight = body.classList.toggle('light'); // クラスのON/OFF切替
+      modeToggle.textContent = isLight ? '🌞 morning' : '🌙 night'; // ボタン表示変更
+      localStorage.setItem('mode', isLight ? 'light' : 'dark'); // 状態を保存
+    });
+
+    // ===== ページ読み込み時にモードとタスクIDを復元 =====
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('mode');
+
+      // モードが保存されていれば反映
+      if (saved === 'light') {
+        body.classList.add('light');
+        modeToggle.textContent = '🌞 morning';
+        localStorage.setItem('mode', 'light');
+      } else {
+        modeToggle.textContent = '🌙 night';
+        localStorage.setItem('mode', 'dark');
+      }
+
+      // 過去データにUUIDがなければ追加（互換性確保）
+      let updated = false;
+      tasks.forEach(task => {
+        if (!task.id) {
+          task.id = crypto.randomUUID();
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        localStorage.setItem('rosaTasks', JSON.stringify(tasks));
+      }
+    });
+  </script>
+</body>
+</html>

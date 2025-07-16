@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!-- HTML5であることを宣言 -->
+<html lang="ja">
+<head>
+  <!-- 文字コードをUTF-8に設定。日本語も正しく表示される -->
+  <meta charset="UTF-8" />
+  <!-- ビューポートの設定。スマホ対応でレスポンシブにする -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- ブラウザタブに表示されるタイトル -->
+  <title>入口 - rosa-task-manager</title>
+
+  <style>
+    /* HTML全体とbodyに初期スタイルを設定（マージン・パディングなし、高さ100%） */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif; /* フォントを読みやすいUI系に */
+    }
+
+    /* bodyの基本スタイル */
+    body {
+      min-height: 100vh; /* コンテンツの高さが画面全体になるように */
+      display: flex; /* Flexboxで要素を縦並びに */
+      flex-direction: column;
+      background-size: cover; /* 背景画像が常に画面全体を覆うように */
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-image 0.3s ease, color 0.3s ease; /* 背景と文字色の切替をスムーズに */
+      background-color: #1e2a38; /* ダークモード時の背景色 */
+      color: white; /* ダークモード時の文字色 */
+    }
+
+    /* ライトモード用のスタイル（背景と文字色） */
+    body.light {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    /* ヘッダーとフッターの共通スタイル */
+    header, footer {
+      height: 70px; /* 高さ固定 */
+      display: flex;
+      align-items: center; /* 垂直中央揃え */
+      padding: 0 1rem; /* 左右に余白 */
+      background-color: #000; /* ダークモード時の背景色 */
+      color: white;
+  
+    }
+
+    /* ヘッダーは左右に要素を配置 */
+    header {
+      justify-content: space-between;
+    }
+
+    /* フッターは左寄せ */
+    footer {
+      justify-content: flex-start;
+    }
+
+    /* ライトモード時のヘッダー・フッター色 */
+    body.light header, body.light footer {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    /* ヘッダー上部の影（黒→透明） */
+    header::before {
+      top: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+    }
+
+    /* 🌗 モード切替ボタン */
+    #mode-toggle {
+      background-color: transparent; /* 背景透明 */
+      border: none; /* ボーダーなし */
+      color: inherit; /* 親要素の文字色を継承 */
+      padding: 0.3rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer; /* マウスオーバーでポインター表示 */
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background-color 0.2s ease;
+    }
+
+    /* ホバー時の背景色（夜） */
+    #mode-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ホバー時の背景色（昼） */
+    body.light #mode-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* 出勤ボタンの共通スタイル */
+    .common-button {
+      font-size: 1.2rem;
+      padding: 1rem 3rem;
+      background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.9), rgba(0,0,0,0));
+      border: none;
+      color: white;
+      border-radius: 0;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* 出勤ボタン：ホバーで拡大＆光のエフェクト */
+    .common-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255,255,255,0.4);
+    }
+
+    /* mainエリア：ボタンを画面下に配置 */
+    main {
+      flex-grow: 1; /* main領域が残りのスペースを埋める */
+      display: flex;
+      justify-content: center;
+      align-items: flex-end; /* 下寄せ */
+      padding-bottom: 95px;
+    }
+
+    /* フッター内のテキストのフォントサイズ */
+    footer span {
+      font-size: 0.9rem;
+    }
+
+    /* ページ遷移時のフェードアウト用黒いオーバーレイ */
+    #fade-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      opacity: 0; /* 最初は透明 */
+      pointer-events: none; /* クリックを通す */
+      transition: opacity 0.8s ease;
+      z-index: 9999; /* 最前面に表示 */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ヘッダー：タイトルとモード切替ボタン -->
+  <header>
+    <span class="header-title">法律事務所 | 入り口</span>
+    <button id="mode-toggle">🌙 night</button>
+  </header>
+
+  <!-- メインコンテンツ：出勤ボタン -->
+  <main>
+    <button id="enter-btn" class="common-button">出勤</button>
+  </main>
+
+  <!-- フッター：著作表示 -->
+  <footer>
+    <span>© Rosaの1日</span>
+  </footer>
+
+  <!-- ページ遷移時に黒くフェードするオーバーレイ -->
+  <div id="fade-overlay"></div>
+
+  <script>
+    // 🌙 モード切替ボタン・ボディ・オーバーレイ要素を取得
+    const modeToggle = document.getElementById('mode-toggle');
+    const body = document.body;
+    const fadeOverlay = document.getElementById('fade-overlay');
+
+    // ライト・ダークモード用の背景画像パス
+    const lightImg = '../Q2imgs/office_morning.png';
+    const darkImg = '../Q2imgs/office_night.png';
+
+    // モード適用関数（引数がtrueならライトモード）
+    function applyMode(isLight) {
+      if (isLight) {
+        body.classList.add('light'); // ライトクラス追加
+        body.style.backgroundImage = `url('${lightImg}')`; // 朝の画像に切り替え
+        modeToggle.textContent = '🌞 morning'; // ボタンの表示変更
+      } else {
+        body.classList.remove('light'); // ライトクラス削除→ダークモードに
+        body.style.backgroundImage = `url('${darkImg}')`; // 夜の画像に切り替え
+        modeToggle.textContent = '🌙 night'; // ボタンの表示変更
+      }
+    }
+
+    // 保存されたモード（localStorageから取得）
+    const saved = localStorage.getItem('mode');
+    if (saved === 'light') {
+      applyMode(true); // ライトモードを適用
+    } else if (saved === 'dark') {
+      applyMode(false); // ダークモードを適用
+    } else {
+      // ユーザーのデバイス設定（ダーク推奨か）で初期モード決定
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyMode(!prefersDark); // ダーク推奨ならライトモード、逆も同様
+    }
+
+    // モード切替ボタンを押した時の挙動
+    modeToggle.addEventListener('click', () => {
+      const isLight = !body.classList.contains('light'); // 現在がダークならtrue
+      applyMode(isLight); // モード変更を適用
+      localStorage.setItem('mode', isLight ? 'light' : 'dark'); // 選択を保存
+    });
+
+    // 出勤ボタン押下でフェード→別ページへ遷移
+    document.getElementById('enter-btn').addEventListener('click', () => {
+      fadeOverlay.style.opacity = 1; // オーバーレイを黒くする
+      setTimeout(() => {
+        window.location.href = 'Q2_index.html'; // 0.8秒後に次のページへ
+      }, 800);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>実績 - rosa-task-manager</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e2a38;
+      color: white;
+      transition: background-color 0.3s, color 0.3s;
+      overflow: hidden;
+    }
+
+    body.light {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    header, footer {
+      position: fixed;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      background-color: #000;
+      color: white;
+      z-index: 999;
+    }
+
+    header {
+      top: 0;
+    }
+
+    footer {
+      bottom: 0;
+    }
+
+    body.light header, body.light footer {
+      background-color: #ffffff;
+      color: #333;
+    }
+
+    .header-title {
+      font-size: 0.9rem;
+    }
+
+    #mode-toggle,
+    #back-btn {
+      background-color: transparent;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    body.light #mode-toggle,
+    body.light #back-btn {
+      color: #333;
+    }
+
+    #mode-toggle:hover,
+    #back-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.light #mode-toggle:hover,
+    body.light #back-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .content-wrapper {
+      position: absolute;
+      top: 70px;
+      bottom: 70px;
+      left: 0;
+      right: 0;
+      overflow-y: auto;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .task-list {
+      background-color: #2c3e50;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    body.light .task-list {
+      background-color: #ffffff;
+    }
+
+    .task-item {
+      background-color: #ffffff11;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+    }
+
+    body.light .task-item {
+      background-color: #eeeeee;
+    }
+
+    .task-item button {
+      margin-top: 0.5rem;
+      background-color: #dc6b9a;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    body.light .task-item button {
+      background-color: #f08ca2;
+      color: white;
+    }
+
+    .task-item button:hover {
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="header-title">法律事務所 | 実績</span>
+    <button id="mode-toggle">🌙 night</button>
+  </header>
+
+  <div class="content-wrapper">
+    <main>
+      <h2>あなたの実績</h2>
+      <div class="task-list" id="achievement-list">
+        <p>読み込み中...</p>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <button id="back-btn" onclick="location.href='Q2_task-list.html'">戻る</button>
+  </footer>
+
+  <script>
+    const achievementList = document.getElementById('achievement-list');
+    const modeToggle = document.getElementById('mode-toggle');
+    const body = document.body;
+
+    function loadAchievements() {
+      const tasks = JSON.parse(localStorage.getItem('rosaTasks')) || [];
+      const completedTasks = tasks.filter(t => t.completed);
+
+      achievementList.innerHTML = '';
+
+      if (completedTasks.length === 0) {
+        achievementList.innerHTML = '<p>完了済みの依頼はまだありません。</p>';
+        return;
+      }
+
+      completedTasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = 'task-item';
+        div.innerHTML = `
+          <strong>${task.name}</strong><br>
+          依頼主：${task.assignedBy}<br>
+          締切：${task.deadline || 'なし'}<br>
+          <button onclick="deleteTask('${task.id}')">削除</button>
+        `;
+        achievementList.appendChild(div);
+      });
+    }
+
+    function deleteTask(id) {
+      const confirmDelete = confirm("この実績を削除してもよろしいですか？");
+      if (!confirmDelete) return;
+
+      let tasks = JSON.parse(localStorage.getItem('rosaTasks')) || [];
+      tasks = tasks.filter(t => t.id !== id);
+      localStorage.setItem('rosaTasks', JSON.stringify(tasks));
+      loadAchievements(); // 再描画
+    }
+
+    modeToggle.addEventListener('click', () => {
+      const isLight = body.classList.toggle('light');
+      modeToggle.textContent = isLight ? '🌙 night' : '🌞 morning';
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('mode');
+      if (saved === 'light') {
+        body.classList.add('light');
+        modeToggle.textContent = '🌙 night';
+      } else {
+        modeToggle.textContent = '🌞 morning';
+      }
+
+      loadAchievements();
+    });
+  </script>
+</body>
+</html>
