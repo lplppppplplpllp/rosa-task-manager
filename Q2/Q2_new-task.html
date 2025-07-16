@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>依頼を登録 - rosa-task-manager</title>
+
+  <style>
+    :root {
+      --bg-color: #1e2a38;
+      --text-color: white;
+      --header-footer-bg: #000;
+    }
+
+    body.light {
+      --text-color: #333;
+      --header-footer-bg: #ffffff;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header, footer {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      background-color: var(--header-footer-bg);
+      color: var(--text-color);
+      z-index: 1;
+    }
+
+    header {
+      justify-content: flex-start;
+    }
+
+    footer {
+      justify-content: flex-start;
+    }
+
+    .header-title {
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+
+    body.light header,
+    body.light footer {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    .header-btn {
+      all: unset;
+      background-color: transparent;
+      color: inherit;
+      padding: 0.3rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background-color 0.2s ease;
+    }
+
+    .header-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.light .header-btn {
+      color: #333;
+    }
+
+    body.light .header-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* 🌙モード切替ボタンを右端に寄せる！ */
+    #mode-toggle {
+      margin-left: auto;
+    }
+
+    main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .form-wrapper {
+      width: 95%;
+      max-width: 800px;
+      background-color: #2c3e50;
+      padding: 2.5rem 2rem;
+      border-radius: 0;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+
+    body.light .form-wrapper {
+      background-color: #ffffff;
+      color: #222;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.6rem;
+      color: #ffffffdd;
+    }
+
+    body.light h2 {
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    input[type="text"], input[type="date"], button[type="submit"] {
+      padding: 1rem;
+      border-radius: 0;
+      border: none;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    input[type="text"], input[type="date"] {
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    button[type="submit"] {
+      background-color: #1e2a38;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #131a23;
+    }
+
+    body.light button[type="submit"] {
+      background-color: #e1dfdf;
+      color: #222;
+    }
+
+    body.light button[type="submit"]:hover {
+      background-color: #cac9c9;
+    }
+
+    .char-select-wrapper {
+      text-align: center;
+    }
+
+    .char-label {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: #ccc;
+    }
+
+    body.light .char-label {
+      color: #555;
+    }
+
+    .char-options {
+      display: flex;
+      justify-content: space-around;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .char-box {
+      border: 3px solid transparent;
+      border-radius: 0;
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.3s;
+      flex: 1;
+      max-width: 200px;
+      background-color: #ffffff08;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .char-box.selected {
+      border-color: #dc6b9a;
+    }
+
+    .char-box img {
+      width: 100%;
+      display: block;
+      border-radius: 0;
+    }
+
+    .char-name {
+      background-color: #f0f0f0;
+      color: #2c3e50;
+      font-family: 'Georgia', serif;
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      border-radius: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ヘッダー -->
+  <header>
+    <span class="header-title">法律事務所 | 依頼の登録</span>
+    <button class="header-btn" id="mode-toggle">🌙 night</button>
+  </header>
+
+  <!-- メイン -->
+  <main>
+    <div class="form-wrapper">
+      <h2>新しい依頼の登録</h2>
+      <form id="task-form">
+        <input type="text" id="task-name" placeholder="依頼の内容（例：報告書作成）" required />
+        <div class="char-select-wrapper">
+          <div class="char-label">誰からの依頼？</div>
+          <div class="char-options">
+            <div class="char-box" data-value="Celestine">
+              <img src="../Q2imgs/Celestine.png" alt="celestine" />
+              <div class="char-name">Celestine</div>
+            </div>
+            <div class="char-box" data-value="Artem">
+              <img src="../Q2imgs/artem.png" alt="artem" />
+              <div class="char-name">Artem</div>
+            </div>
+            <div class="char-box" data-value="Kiki">
+              <img src="../Q2imgs/kiki.png" alt="kiki" />
+              <div class="char-name">Kiki</div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="assigned-by" required />
+        <input type="date" id="task-deadline" />
+        <button type="submit">依頼を登録する</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- フッター -->
+  <footer>
+    <button class="header-btn" id="back-btn" onclick="location.href='Q2_index.html'">受付に戻る</button>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const form = document.getElementById('task-form');
+    const assignedInput = document.getElementById('assigned-by');
+    const boxes = document.querySelectorAll('.char-box');
+    const modeToggle = document.getElementById('mode-toggle');
+    const body = document.body;
+
+    let tasks = JSON.parse(localStorage.getItem('rosaTasks')) || [];
+
+    boxes.forEach(box => {
+      box.addEventListener('click', () => {
+        boxes.forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+        assignedInput.value = box.getAttribute('data-value');
+      });
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('task-name').value;
+      const assignedBy = assignedInput.value;
+      const deadline = document.getElementById('task-deadline').value;
+
+      if (!assignedBy) {
+        alert('依頼者を選んでください！');
+        return;
+      }
+
+      const newTask = {
+        id: crypto.randomUUID(),
+        name,
+        assignedBy,
+        deadline,
+        completed: false
+      };
+
+      tasks.push(newTask);
+      localStorage.setItem('rosaTasks', JSON.stringify(tasks));
+      alert('任務を登録しました！');
+      form.reset();
+      boxes.forEach(b => b.classList.remove('selected'));
+      assignedInput.value = '';
+    });
+
+    modeToggle.addEventListener('click', () => {
+      const isLight = body.classList.contains('light');
+      if (isLight) {
+        body.classList.remove('light');
+        modeToggle.textContent = '🌙 night';
+        localStorage.setItem('mode', 'dark');
+      } else {
+        body.classList.add('light');
+        modeToggle.textContent = '🌞 morning';
+        localStorage.setItem('mode', 'light');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('mode');
+      if (saved === 'light') {
+        body.classList.add('light');
+        modeToggle.textContent = '🌞 morning';
+      } else {
+        modeToggle.textContent = '🌙 night';
+      }
+    });
+  </script>
+</body>
+</html>

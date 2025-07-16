@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!-- このHTML文書がHTML5で書かれていることを宣言するタグ -->
+<html lang="ja">
+<!-- このHTML文書の言語は日本語であることを示す -->
+
+<head>
+  <!-- 文字コードをUTF-8に設定。日本語など様々な文字が正しく表示できるようにする -->
+  <meta charset="UTF-8" />
+
+  <!-- スマホやタブレットでもレイアウトが崩れないようにする設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- タブに表示されるページのタイトル -->
+  <title>テラス - rosa-task-manager</title>
+
+  <style>
+    /* ------- 全体の見た目（bodyタグ）を設定 ------- */
+    body {
+      margin: 0; /* 画面の端に余白が入らないようにする */
+      padding: 0; /* 内側の余白もゼロにする */
+      font-family: 'Segoe UI', sans-serif; /* 見やすくて現代的なフォントを使う */
+      background-image: url('../Q2imgs/terrace.png'); /* 背景画像を読み込む（カフェの画像） */
+      background-size: cover; /* 背景画像を画面いっぱいに広げて表示 */
+      background-position: center; /* 背景の中心を中央に合わせる */
+      background-attachment: fixed; /* スクロールしても背景が固定されたままになる */
+      min-height: 100vh; /* コンテンツの高さが最低でも画面いっぱいになるように */
+      color: white; /* テキストの色を白に設定 */
+      display: flex; /* 子要素を縦に並べる準備 */
+      flex-direction: column; /* ヘッダー→メイン→フッターのように縦並びにする */
+    }
+
+    main {
+      flex-grow: 1; /* メイン部分が余白を埋めるように広がるようにする */
+    }
+
+    /* ------- ヘッダーとフッターの共通デザイン ------- */
+    header, footer {
+      height: 70px; /* 高さを固定 */
+      display: flex; /* 横並びにするためにflexboxを使う */
+      align-items: center; /* 垂直方向の中央に揃える */
+      padding: 0 1rem; /* 左右に少し余白を入れる */
+      background-color: #000; /* 背景を黒に */
+      color: white; /* 文字色は白にする */
+    }
+
+    header {
+      justify-content: space-between; /* ヘッダー内の要素を両端に分けて配置 */
+    }
+
+    footer {
+      justify-content: flex-start; /* フッター内の要素を左側に寄せて配置 */
+    }
+
+    /* ------- ライトモード時の色設定（class="light" がbodyに追加されているとき） ------- */
+    body.light header,
+    body.light footer {
+      background-color: #f2f2f2; /* 明るい灰色の背景に変更 */
+      color: #333; /* 濃いグレーの文字色にする */
+    }
+
+    /* ------- ヘッダーのタイトルのスタイル ------- */
+    .header-title {
+      font-size: 0.9rem; /* 小さめの文字サイズ */
+      line-height: 70px; /* 行の高さをヘッダーと同じにすることで中央に揃える */
+      margin: 0; /* 上下の余白をなくす */
+    }
+
+    /* ------- モード切り替えボタンの見た目 ------- */
+    #mode-toggle {
+      background-color: transparent; /* 背景は透明 */
+      border: none; /* 枠線なし */
+      color: inherit; /* 親要素の文字色を使う（白 or 黒） */
+      padding: 0.3rem 0.8rem; /* 少し内側に余白をつける */
+      border-radius: 5px; /* 角を少し丸くする */
+      cursor: pointer; /* ホバー時にマウスポインターを指にする */
+      font-size: 1.2rem; /* 文字サイズを少し大きく */
+      font-weight: bold; /* 太文字にする */
+      letter-spacing: 1px; /* 文字と文字の間隔を少し広げる */
+      transition: background-color 0.2s ease; /* 背景色の変化をなめらかにする */
+    }
+
+    /* ------- 戻るボタンの見た目 ------- */
+    #back-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      padding: 0.3rem 0.8rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ------- ホバー時のエフェクト（どちらのボタンも） ------- */
+    #mode-toggle:hover, #back-btn:hover {
+      background: rgba(255,255,255,0.1); /* 少し白っぽい背景に */
+    }
+
+    /* ------- ライトモード時のボタンの文字色変更 ------- */
+    body.light #mode-toggle,
+    body.light #back-btn {
+      color: #333;
+    }
+
+    /* ------- ライトモードでホバー時の背景 ------- */
+    body.light #mode-toggle:hover,
+    body.light #back-btn:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    /* ------- BGM選択エリアの見た目 ------- */
+    .bgm-container {
+      position: fixed; /* 画面に固定配置（スクロールしても動かない） */
+      right: 1rem; /* 画面右に配置 */
+      bottom: 90px; /* 下から90pxの位置に配置 */
+      background: rgba(0,0,0,0.6); /* 半透明の黒背景 */
+      padding: 0.8rem 1.1rem; /* 内側に余白 */
+      border-radius: 8px; /* 角を丸く */
+      z-index: 10; /* 他の要素より前面に表示 */
+      backdrop-filter: blur(2px); /* 背景を少しぼかす */
+    }
+
+    .bgm-container label {
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+
+    .bgm-container select {
+      padding: 0.3rem 0.8rem;
+      font-size: 0.95rem;
+      border-radius: 4px;
+      border: none;
+      margin-top: 0.3rem;
+    }
+
+    /* ------- BGM動画を表示するための枠（最初は非表示） ------- */
+    .video-frame {
+      position: fixed;
+      left: 1rem;
+      bottom: 90px;
+      width: 320px;
+      height: 180px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      overflow: hidden;
+      z-index: 9;
+      display: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ------- スマホなど画面幅が狭いときの調整（レスポンシブ対応） ------- */
+    @media (max-width: 700px) {
+      .video-frame {
+        width: 90vw;
+        height: 30vw;
+        min-height: 120px;
+        left: 5vw;
+      }
+
+      .bgm-container {
+        right: 0.7rem;
+        left: auto;
+        min-width: 120px;
+      }
+    }
+  </style>
+
+  <!-- 🔽 ページが開かれたときに保存されたモード（ライト or ダーク）を反映させる処理 -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedMode = localStorage.getItem('mode'); // 保存されているモードを取得
+      if (savedMode === 'light') {
+        document.body.classList.add('light'); // ライトモードを有効にする
+        document.getElementById("mode-toggle").textContent = "🌞 morning"; // ボタンの表示を朝に
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <!-- ページ上部のバー（タイトルとモード切り替えボタン） -->
+  <header>
+    <span class="header-title">法律事務所 | テラス</span>
+    <button id="mode-toggle">🌙 night</button>
+  </header>
+
+  <!-- 🎵 BGM選択のUI -->
+  <div class="bgm-container">
+    <label for="bgmSelect">🎵 BGM</label>
+    <select id="bgmSelect">
+      <option value="">オフ</option>
+      <option value="https://www.youtube.com/embed/8fUStnj06II?autoplay=1">① Study with BTS</option>
+      <option value="https://www.youtube.com/embed/nTY_2MjQ2CI?autoplay=1">② BTS with piano</option>
+      <option value="https://www.youtube.com/embed/9YfbfkcNI0Y?autoplay=1">③ Tears of themis's BGM</option>
+    </select>
+  </div>
+
+  <!-- 🎥 BGM再生用のYouTube動画エリア -->
+  <div class="video-frame" id="videoContainer">
+    <iframe id="bgmPlayer"
+      src=""
+      title="YouTube video player"
+      allow="autoplay; encrypted-media"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <!-- メインの内容（今回は空） -->
+  <main></main>
+
+  <!-- ページ下部の戻るボタン -->
+  <footer>
+    <button id="back-btn" onclick="location.href='Q2_work.html'">戻る</button>
+  </footer>
+
+  <script>
+    // 🎵 BGMの選択が変更されたときの処理
+    const select = document.getElementById("bgmSelect"); // セレクトボックスを取得
+    const player = document.getElementById("bgmPlayer"); // YouTubeプレイヤーのiframeを取得
+    const frame = document.getElementById("videoContainer"); // 動画表示枠を取得
+
+    select.addEventListener("change", function () {
+      if (this.value) {
+        player.src = this.value;       // 選ばれたBGMのURLを再生
+        frame.style.display = "block"; // 動画枠を表示する
+      } else {
+        player.src = "";               // 再生を止める
+        frame.style.display = "none";  // 動画枠を非表示にする
+      }
+    });
+
+    // 🌗 モード切り替えボタンが押されたときの処理
+    document.getElementById("mode-toggle").onclick = function () {
+      document.body.classList.toggle("light"); // lightクラスを追加・削除してモード切替
+      const isLight = document.body.classList.contains("light"); // 今がライトモードか判定
+      this.textContent = isLight ? "🌞 morning" : "🌙 night"; // ボタンの表示を切り替え
+      localStorage.setItem("mode", isLight ? "light" : "dark"); // 選択したモードを保存
+    };
+  </script>
+</body>
+</html>
