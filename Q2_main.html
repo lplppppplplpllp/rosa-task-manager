@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!-- HTML5文書であることを宣言 -->
+
+<html lang="ja">
+<!-- ページの言語を日本語に設定 -->
+
+<head>
+  <!-- 文字コードをUTF-8に設定（日本語対応） -->
+  <meta charset="UTF-8" />
+  
+  <!-- スマホやタブレットでの表示を最適化するための設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ブラウザのタブに表示されるページタイトル -->
+  <title>受付 - rosa-task-manager</title>
+
+  <style>
+    /* ========= カスタム変数の定義 ========= */
+    :root {
+      --bg-color: #1e2a38;          /* 全体の背景色（ダークモード時） */
+      --text-color: white;         /* 文字色（ダークモード時） */
+      --header-footer-bg: #000;    /* ヘッダー・フッターの背景色（ダークモード時） */
+    }
+
+    /* ライトモード時に上書きするカスタム変数の定義 */
+    body.light-mode {
+      --text-color: #333;           /* ライトモードの文字色 */
+      --header-footer-bg: #ffffff;  /* ヘッダー・フッター背景色（ライトモード） */
+    }
+
+    /* ========= ページ全体のスタイル設定 ========= */
+    body {
+      margin: 0;                      /* ページの余白をゼロに */
+      padding: 0;                     /* ページ内の余白もゼロに */
+      height: 100vh;                  /* 画面の高さにフィットさせる */
+      font-family: 'Segoe UI', sans-serif; /* 見やすいモダンなフォントを指定 */
+      display: flex;                 /* Flexboxでレイアウト管理（縦方向） */
+      flex-direction: column;       /* ヘッダー→メイン→フッターの縦並びにする */
+      background-color: var(--bg-color); /* カスタム変数から背景色を適用 */
+      background-size: cover;       /* 背景画像を常に全体に表示 */
+      background-position: center;  /* 背景画像を中央に配置 */
+      background-repeat: no-repeat; /* 背景画像の繰り返しを無効化 */
+      color: var(--text-color);     /* 文字色もカスタム変数で管理 */
+      transition: background-color 0.3s, color 0.3s; /* スムーズに色が切り替わる */
+    }
+
+    /* ========= ヘッダー・フッター共通のスタイル ========= */
+    header, footer {
+      height: 70px;                        /* 高さを固定 */
+      display: flex;                       /* 横並びレイアウトに */
+      align-items: center;                 /* 縦方向中央寄せ */
+      padding: 0 1rem;                     /* 左右に余白を追加 */
+      background-color: var(--header-footer-bg); /* 背景色を変数で管理 */
+      color: var(--text-color);           /* 文字色も変数で管理 */
+      position: relative;                 /* 疑似要素（グラデーション）のための基準位置 */
+      z-index: 1;                         /* 背景などの下にならないように */
+    }
+
+        /* ヘッダーは左右に要素を配置 */
+    header {
+      justify-content: space-between;
+    }
+
+    /* フッターは左寄せ */
+    footer {
+      justify-content: flex-start;
+    }
+
+
+    /* ========= ライトモード時の色上書き ========= */
+    body.light-mode header,
+    body.light-mode footer {
+      background-color: #f2f2f2; /* 薄いグレーの背景に */
+    }
+
+    body.light-mode header::before {
+      background: linear-gradient(to bottom, rgba(242,242,242,1), rgba(242,242,242,0));
+    }
+
+    body.light-mode footer::before {
+      background: linear-gradient(to top, rgba(242,242,242,1), rgba(242,242,242,0));
+    }
+
+    /* ========= ヘッダーのタイトル文字サイズを調整 ========= */
+    .header-title {
+      font-size: 0.9rem;
+    }
+
+    /* ========= 🌙☀ モード切替ボタンのスタイル ========= */
+    #mode-toggle {
+      background-color: transparent; /* 背景は透明 */
+      border: none;                  /* 枠線なし */
+      color: inherit;                /* 親要素から文字色を継承 */
+      padding: 0.3rem 0.8rem;        /* 内側の余白 */
+      border-radius: 5px;            /* 少し角を丸める */
+      cursor: pointer;               /* ホバーでポインター表示 */
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;           /* 文字間を少し広げる */
+      transition: background-color 0.2s ease; /* ホバー時の背景色変化を滑らかに */
+    }
+
+    #mode-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.1); /* うっすら白背景 */
+    }
+
+    /* ========= メインレイアウトエリア ========= */
+    main {
+      flex: 1; /* ヘッダー・フッター以外の空間をすべて占める */
+      display: flex; /* 横並びに */
+    }
+    /* ========= 左側のメニューパネル（縦ボタン3つ） ========= */
+    .left-panel {
+      display: flex;                     /* 中のボタンを縦並びにする */
+      flex-direction: column;
+      justify-content: center;          /* 垂直方向に中央揃え */
+      align-items: flex-start;          /* 左寄せに配置 */
+      padding: 2rem;                    /* パネル内全体に余白 */
+      padding-left: 100px;              /* 特に左は大きめに余白 */
+      gap: 2rem;                        /* ボタン間の間隔を2remに設定 */
+      width: auto;                      /* 幅は自動で調整 */
+      margin-right: 100px;              /* 作業パネルとの間を空ける */
+    }
+
+    /* ========= メニューボタン（依頼を登録／確認／退勤） ========= */
+    .menu-btn {
+      width: 800px;                     /* 幅を固定 */
+      height: 80px;                     /* 高さを固定 */
+      font-size: 1.3rem;                /* 文字を大きめに */
+      background: linear-gradient(      /* 横方向にぼんやりグラデ */
+        to right,
+        rgba(44, 62, 80, 0) 0%,
+        rgba(44, 62, 80, 0.5) 50%,
+        rgba(44, 62, 80, 0) 100%
+      );
+      color: var(--text-color);        /* ダーク／ライト両対応の文字色 */
+      border: none;                    /* 枠線なし */
+      border-radius: 0;                /* 角を丸めず直線的に */
+      cursor: pointer;                 /* クリックできる形に */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* 少しだけ影をつける */
+      transition: transform 0.2s ease, background 0.2s; /* 拡大・背景色の変化を滑らかに */
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .menu-btn:hover {
+      transform: scale(1.05);          /* ホバー時に少し拡大 */
+    }
+
+    /* ライトモード時のメニューボタン背景（明るめの白グラデ） */
+    body.light-mode .menu-btn {
+      background: linear-gradient(
+        to right,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.5) 50%,
+        rgba(255,255,255,0) 100%
+      );
+    }
+
+    /* ========= 右側の作業パネル（「作業する」） ========= */
+    .work-panel {
+      width: calc(100% - 800px - 100px - 4rem); /* 全体幅から左パネルと余白分を引いた幅 */
+      background: linear-gradient(              /* 少し濃い目のグラデーション背景 */
+        to right,
+        rgba(44, 62, 80, 0) 0%,
+        rgba(44, 62, 80, 0.5) 40%,
+        rgba(44, 62, 80, 0.5) 100%
+      );
+      display: flex;
+      justify-content: center;         /* 横方向中央揃え */
+      align-items: center;             /* 縦方向中央揃え */
+      cursor: pointer;
+      transition: background 0.3s;
+      text-align: center;
+    }
+
+    .work-panel:hover {
+      transform: scale(1.02);          /* ホバー時に少し拡大 */
+    }
+
+    /* 「作業する」の文字のスタイル */
+    .work-panel h2 {
+      color: var(--text-color);
+      font-size: 2rem;
+      letter-spacing: 2px;
+      user-select: none;               /* テキスト選択不可にする */
+    }
+
+    /* フッターの文字サイズ */
+    footer span {
+      font-size: 0.9rem;
+    }
+
+    /* ========= レスポンシブ対応：画面が狭い場合の調整 ========= */
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;        /* 横並びから縦並びへ */
+      }
+
+      .left-panel,
+      .work-panel {
+        width: 100%;                  /* 幅を100%に広げる */
+        margin-right: 0;
+        padding-left: 2rem;           /* 左側に少し余白をキープ */
+      }
+
+      .work-panel {
+        height: 200px;                /* 高さを固定に変更 */
+      }
+
+      .left-panel {
+        align-items: center;          /* 横方向中央揃えに変更 */
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ヘッダー：ページ上部に固定される領域 -->
+  <header>
+    <!-- ヘッダータイトル：現在の場所を示すテキスト -->
+    <span class="header-title">法律事務所 | 受付</span>
+    
+    <!-- 🌙☀ モード切替ボタン。クリックで toggleMode() を呼び出す -->
+    <button id="mode-toggle" onclick="toggleMode()">🌙 night</button>
+  </header>
+
+  <!-- メインコンテンツ領域：左右の2分割レイアウト -->
+  <main>
+    <!-- 左側：操作メニュー（3つのボタン） -->
+    <div class="left-panel">
+      <!-- 依頼登録ページに遷移するボタン -->
+      <button class="menu-btn" onclick="location.href='Q2_new-task.html'">依頼を登録する</button>
+
+      <!-- 依頼確認ページに遷移するボタン -->
+      <button class="menu-btn" onclick="location.href='Q2_task-list.html'">依頼を確認する</button>
+
+      <!-- オープニングページに戻って「退勤」するボタン -->
+      <button class="menu-btn" onclick="location.href='index.html'">退勤する</button>
+    </div>
+
+    <!-- 右側：作業するボタンパネル。クリックで作業ページへ -->
+    <div class="work-panel" onclick="location.href='Q2_work.html'">
+      <!-- 見出し：「作業する」 -->
+      <h2>作業する</h2>
+    </div>
+  </main>
+
+  <!-- フッター：ページ最下部の情報表示エリア -->
+  <footer>
+  </footer>
+
+  <!-- ========= JavaScript部分 ========= -->
+  <script>
+    // 背景画像を現在のモードに応じて切り替える関数
+    function setBackgroundImage() {
+      const body = document.body; // <body>要素を取得
+      if (body.classList.contains("light-mode")) {
+        // ライトモードの場合、朝の受付画像に
+        body.style.backgroundImage = "url('Q2imgs/reception_morning.png')";
+      } else {
+        // ダークモードの場合、夜の受付画像に
+        body.style.backgroundImage = "url('Q2imgs/reception_night.png')";
+      }
+    }
+
+    // 🌞⇄🌙 モード切替ボタンを押したときに呼ばれる関数
+    function toggleMode() {
+      const body = document.body; // bodyタグを取得
+
+      // ライトモードをトグル（ついてたら外す・外れてたらつける）
+      const isLight = body.classList.toggle("light-mode");
+
+      // モードの状態を localStorage に保存（ページ再訪問時にも反映）
+      localStorage.setItem("mode", isLight ? "light" : "dark");
+
+      // 背景画像を現在のモードに合わせて切り替える
+      setBackgroundImage();
+
+      // ボタンの表示もモードに応じて切り替える（🌞 or 🌙）
+      const modeToggle = document.getElementById("mode-toggle");
+      modeToggle.textContent = isLight ? "🌞 morning" : "🌙 night";
+    }
+
+    // ページの読み込みが完了したときに実行される初期処理
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedMode = localStorage.getItem("mode"); // 保存されているモードを取得
+      const body = document.body;
+      const modeToggle = document.getElementById("mode-toggle");
+
+      if (savedMode === "light") {
+        // 保存がライトモードなら、ライトモードに設定
+        body.classList.add("light-mode");
+        modeToggle.textContent = "🌞 morning"; // ボタン表示も朝に
+      } else {
+        // ダーク or 未設定ならデフォルト（夜）
+        modeToggle.textContent = "🌙 night";
+      }
+
+      // 現在のモードに応じて背景画像をセット
+      setBackgroundImage();
+    });
+  </script>
+</body>
+</html>

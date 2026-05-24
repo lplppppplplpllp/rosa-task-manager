@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- HTML5 ドキュメントであることを宣言 -->
+
+<html lang="ja">
+<!-- 文書の言語を日本語に設定 -->
+
+<head>
+  <!-- 文字コードをUTF-8に指定（日本語含め多言語対応） -->
+  <meta charset="UTF-8" />
+
+  <!-- モバイル・タブレットでも正しく表示されるようにレスポンシブ設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ブラウザのタブに表示されるページ名 -->
+  <title>作業場所 - Rrosa-task-manager</title>
+
+  <style>
+    /* ===== body共通設定（背景・文字色・レイアウト）===== */
+    body {
+      margin: 0; /* ページ全体の余白をゼロに */
+      padding: 0; /* 内側の余白もゼロに */
+      font-family: 'Segoe UI', sans-serif; /* 読みやすいモダンなフォント */
+      min-height: 100vh; /* 少なくとも画面の高さに合わせる */
+      display: flex;
+      flex-direction: column; /* 上から下へ順に並べる */
+      background-color: #1e2a38; /* ダークモード背景 */
+      color: white; /* ダークモードの文字色 */
+      transition: background-color 0.3s, color 0.3s; /* モード切替時のアニメーション */
+    }
+
+    /* ===== ライトモードの設定 ===== */
+    body.light {
+      background-color: #f2f2f2;
+      color: #333;
+    }
+
+    /* ===== ヘッダーとフッター共通のスタイル ===== */
+    header, footer {
+      height: 70px;
+      position: fixed;        /* 画面に固定 */
+      width: 100%;            /* 横幅いっぱいに */
+      left: 0;
+      z-index: 1000;          /* 最前面に表示 */
+      display: flex;
+      align-items: center;    /* 垂直中央に */
+      justify-content: space-between; /* 左右に配置 */
+      padding: 0 1rem;
+      background-color: black;
+      color: white;
+    }
+
+    /* ===== ヘッダーの追加設定（明示的に指定） ===== */
+    header {
+      top: 0; /* 上部に固定 */
+      left: 0;
+      right: 0;
+    }
+
+    /* ===== フッターの位置指定 ===== */
+    footer {
+      bottom: 0;
+    }
+
+    /* ===== ライトモード時のヘッダー・フッターの色変更 ===== */
+    body.light header,
+    body.light footer {
+      background-color: white;
+      color: #333;
+    }
+
+    /* ===== ヘッダーのタイトルサイズ ===== */
+    .header-title {
+      font-size: 0.9rem;
+    }
+
+    /* ===== モード切替ボタンと戻るボタン共通スタイル ===== */
+    #mode-toggle,
+    #back-btn,
+    #achievement-btn {
+      background-color: transparent; /* 背景なし */
+      border: none; /* 枠なし */
+      color: white;
+      padding: 0.3rem 0.8rem;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* ===== モード切替ボタンを右上に少し寄せる調整 ===== */
+    #mode-toggle {
+      margin-right: 1.5rem;
+    }
+
+    /* ライトモード時の文字色変更 */
+    body.light #mode-toggle {
+      color: #333;
+    }
+
+    /* ライトモード時の「受付に戻る」ボタンの文字色を変更 */
+body.light #back-btn {
+  color: #333;
+}
+
+    /* ホバー時にうっすら背景を付ける（ダークモード） */
+    #mode-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ホバー時（ライトモード） */
+    body.light #mode-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== メインエリアの基本レイアウト ===== */
+    main {
+      flex-grow: 1; /* 空いたスペースすべて使う */
+      padding: 120px 1rem 90px; /* ヘッダー70px + フッター70px分を上下に余白 */
+      max-width: 1100px;
+      margin: 0 auto; /* 中央寄せ */
+    }
+
+    /* ===== 見出しスタイル ===== */
+    h2 {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      font-size: 1.6rem;
+    }
+
+    /* ===== 各ロケーションの一覧をグリッド状に表示 ===== */
+    .location-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2.5rem; /* 各ボックスの間隔 */
+    }
+
+    /* ===== 各ロケーションボックスのスタイル ===== */
+    .location-box {
+      background-color: #2c3e50;
+      border-radius: 0; /* 丸みなしでスタイリッシュに */
+      overflow: hidden;
+      text-align: center;
+      width: 250px;
+      height: auto;
+      cursor: pointer;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.4); /* 立体感 */
+      transition: transform 0.25s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ライトモードでの背景変更 */
+    body.light .location-box {
+      background-color: #ffffff;
+    }
+
+    /* ホバー時の拡大アニメーション */
+    .location-box:hover {
+      transform: scale(1.07);
+    }
+
+    /* ===== ロケーション画像のスタイル ===== */
+    .location-box img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover; /* 画像を枠にフィットさせる */
+      border-radius: 0;
+      display: block;
+    }
+
+    /* ===== 場所名テキスト（画像下） ===== */
+    .location-name {
+      background-color: #f0f0f0;
+      color: #2c3e50;
+      font-family: 'Georgia', serif;
+      padding: 0.8rem 0;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      margin: 0; /* デフォルトの余白をリセット */
+      border-radius: 0;
+    }
+
+    /* ===== 戻るリンク（今回は未使用） ===== */
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 2.5rem;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    body.light .back-link {
+      color: #555;
+    }
+
+    /* ===== フッターの文字サイズ指定（今回ボタンのみ） ===== */
+    footer span {
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== ヘッダー（固定表示）===== -->
+  <header>
+    <!-- ページタイトルを表示 -->
+    <span class="header-title">法律事務所 | 依頼一覧</span>
+
+    <!-- 🌙/🌞 モード切替ボタン（クリックで切り替え） -->
+    <button id="mode-toggle">🌙 night</button>
+  </header>
+
+  <!-- ===== メインコンテンツエリア ===== -->
+  <main>
+    <!-- 作業場所の選択を促す見出し -->
+    <h2>どこで作業しますか？</h2>
+
+    <!-- ロケーション一覧のグリッド -->
+    <div class="location-grid">
+      <!-- 各ロケーションボックス（クリックで対応ページへ移動） -->
+
+      <!-- ① マイデスク -->
+      <div class="location-box" onclick="location.href='Q2_mydesk.html'">
+        <img src="Q2imgs/mydesk.png" alt="マイデスク" />
+        <div class="location-name">マイデスク</div>
+      </div>
+
+      <!-- ② 給湯室 -->
+      <div class="location-box" onclick="location.href='Q2_kitchen.html'">
+        <img src="Q2imgs/kitchen.png" alt="給湯室" />
+        <div class="location-name">給湯室</div>
+      </div>
+
+      <!-- ③ テラス -->
+      <div class="location-box" onclick="location.href='Q2_terrace.html'">
+        <img src="Q2imgs/terrace.png" alt="テラス" />
+        <div class="location-name">テラス</div>
+      </div>
+
+      <!-- ④ Artemの執務室 -->
+      <div class="location-box" onclick="location.href='Q2_artem-office.html'">
+        <img src="Q2imgs/Artemroom.png" alt="Artemの執務室" />
+        <div class="location-name">Artemの執務室</div>
+      </div>
+
+      <!-- ⑤ カフェ -->
+      <div class="location-box" onclick="location.href='Q2_cafe.html'">
+        <img src="Q2imgs/cafe.png" alt="カフェ" />
+        <div class="location-name">カフェ</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== フッター：戻るボタンのみ表示（固定）===== -->
+  <footer>
+    <!-- 受付画面（トップ）に戻るボタン -->
+    <button id="back-btn" onclick="location.href='Q2_main.html'">受付に戻る</button>
+  </footer>
+
+  <!-- ===== JavaScript：モード切替と保存処理 ===== -->
+  <script>
+    // 🌙/🌞 切替ボタンと body を取得
+    const modeToggle = document.getElementById('mode-toggle');
+    const body = document.body;
+
+    // 🌗 ボタンがクリックされたときの処理
+    modeToggle.addEventListener('click', () => {
+      // 現在のモードをトグル（ON→OFF / OFF→ON）
+      const isLight = body.classList.toggle('light');
+
+      // ボタンの表示テキストを変更
+      modeToggle.textContent = isLight ? '🌞 morning' : '🌙 night';
+
+      // 選択されたモードを localStorage に保存
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    });
+
+    // ページ読み込み時にモードを復元する処理
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('mode'); // 保存されているモードを取得
+
+      if (saved === 'light') {
+        body.classList.add('light'); // ライトモードに設定
+        modeToggle.textContent = '🌞 morning'; // ボタン表示も合わせる
+      } else {
+        modeToggle.textContent = '🌙 night'; // ダークモード時のボタン表示
+      }
+    });
+  </script>
+</body>
+</html>
