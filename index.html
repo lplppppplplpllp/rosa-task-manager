@@ -24,7 +24,7 @@
       display: flex; /* Flexboxで要素を縦並びに */
       flex-direction: column;
       background-size: cover; /* 背景画像が常に画面全体を覆うように */
-      background-position: center;
+      background-position: calc(50% - 10px) calc(50% + 15px);
       background-repeat: no-repeat;
       transition: background-image 0.3s ease, color 0.3s ease; /* 背景と文字色の切替をスムーズに */
       background-color: #1e2a38; /* ダークモード時の背景色 */
@@ -169,8 +169,8 @@
     const fadeOverlay = document.getElementById('fade-overlay');
 
     // ライト・ダークモード用の背景画像パス
-    const lightImg = 'office_morning.png';
-    const darkImg = 'office_night.png';
+    const lightImg = 'Q2imgs/office_morning.png';
+    const darkImg = 'Q2imgs/office_night.png';
 
     // モード適用関数（引数がtrueならライトモード）
     function applyMode(isLight) {
